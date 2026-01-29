@@ -1,0 +1,28 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          docker stop nginx-app || true
+          docker rm nginx-app || true
+          rm -rf aws-cicd-app
+          git clone https://github.com/Anusha-star-dot/aws-cicd-practice.git aws-cicd-app
+          cd aws-cicd-app
+          docker build -t nginx-app .
+          docker run -d -p 80:80 --name nginx-app nginx-app
