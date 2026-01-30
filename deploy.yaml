@@ -1,26 +1,14 @@
-name: Deploy Nginx App to EC2
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          sudo docker stop nginx || true
-          sudo docker rm nginx || true
-          sudo docker build -t nginx-app .
-          sudo docker run -d -p 80:80 --name nginx nginx-app
+- name: Deploy to EC2 via SSH
+  uses: appleboy/ssh-action@v1.0.3
+  with:
+    host: ${{ secrets.EC2_HOST }}
+    username: ${{ secrets.EC2_USER }}
+    key: ${{ secrets.SSH_PRIVATE_KEY }}
+    script: |
+      docker stop nginx-app || true
+      docker rm nginx-app || true
+      rm -rf aws-cicd-app
+      git clone https://github.com/Anusha-star-dot/aws-cicd-practice.git aws-cicd-app
+      cd aws-cicd-app
+      docker build -t nginx-app .
+      docker run -d -p 80:80 --name nginx-app nginx-app
