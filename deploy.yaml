@@ -1,14 +1,11 @@
-- name: Deploy to EC2 via SSH
-  uses: appleboy/ssh-action@v1.0.3
+- name: Deploy to EC2
+  uses: appleboy/ssh-action@v1.0.0
   with:
     host: ${{ secrets.EC2_HOST }}
     username: ${{ secrets.EC2_USER }}
-    key: ${{ secrets.SSH_PRIVATE_KEY }}
+    key: ${{ secrets.EC2_KEY }}
     script: |
-      docker stop nginx-app || true
-      docker rm nginx-app || true
-      rm -rf aws-cicd-app
-      git clone https://github.com/Anusha-star-dot/aws-cicd-practice.git aws-cicd-app
-      cd aws-cicd-app
-      docker build -t nginx-app .
-      docker run -d -p 80:80 --name nginx-app nginx-app
+      docker pull nginx
+      docker stop nginx || true
+      docker rm nginx || true
+      docker run -d -p 80:80 --name nginx nginx
